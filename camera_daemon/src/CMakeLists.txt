@@ -1,0 +1,7 @@
+# top level CMakeLists.txt
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+
+PROJECT(camera_daemon)
+
+ADD_SUBDIRECTORY(lib)
+ADD_SUBDIRECTORY(code)

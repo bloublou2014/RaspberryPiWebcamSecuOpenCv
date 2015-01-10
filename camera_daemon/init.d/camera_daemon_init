@@ -1,0 +1,70 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          camera_daemon_init
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Camera Monitor daemon at boot time
+# Description:       
+### END INIT INFO
+
+CAMERAMONITOR_PROCESSNAME=camera_daemon
+CAMERAMONITOR_PATH=/home/pi/camera_daemon
+CAMERAMONITOR_INI=/home/pi/camera_daemon/cameraMonitorDaemon.conf
+PIDFILE=/tmp/camera_daemon.pid
+
+start() {
+        echo -n "Starting Camera Monitor daemon: "
+        if [ -f $PIDFILE ]; then
+                PID=`cat $PIDFILE`
+                echo -n  "Camera Monitor daemon already running: $PID"
+                exit 2;
+        else
+                $CAMERAMONITOR_PATH/$CAMERAMONITOR_PROCESSNAME -INI $CAMERAMONITOR_INI
+                RETVAL=$?
+                echo
+                [ $RETVAL -eq 0 ]
+                return $RETVAL
+        fi
+}
+
+stop() {
+		if [ -f $PIDFILE ]; then
+			PID=`cat $PIDFILE`
+			echo "Shutting down Camera Monitor daemon: $PID"
+			kill $PID			
+		else
+			echo "No PidFile, cannot stop process name $CAMERAMONITOR_PROCESSNAME"		
+			exit 2;
+		fi
+		
+		if [ -f $PIDFILE ]; then
+			echo "current pid file : $PIDFILE"
+			echo "delete pid file"
+			rm $PIDFILE
+		fi
+		return 0
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+# 		status $CAMERAMONITOR_PROCESSNAME
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage:  {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+exit $?
