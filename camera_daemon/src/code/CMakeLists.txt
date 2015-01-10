@@ -6,8 +6,8 @@ INCLUDE_DIRECTORIES(
   /usr/local/include
   )
 
-set(executable_output_path ${CMAKE_SOURCE_DIR}/bin)
-set(library_output_path ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+  
 set(cmake_cxx_flags "-o3 -w -Wwrite-strings")
 set(cmake_cxx_link_flags "-pg")
 
