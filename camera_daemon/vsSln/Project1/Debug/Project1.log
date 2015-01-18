@@ -1,0 +1,88 @@
+﻿Build started 18/01/2015 17:54:01.
+     1>Project "F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\vsSln\Project1\Project1.vcxproj" on node 2 (Build target(s)).
+     1>PreBuildEvent:
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\vsSln\Project1\..\..\compil\compilFromWindowsToRaspberry.bat
+         :VCEnd
+         === Copy Source to Raspberry Pi ===
+         batch           abort     
+         Searching for host...
+         Connecting to host...
+         Authenticating...
+         Using username "pi".
+         Authenticating with pre-entered password.
+         Authenticated.
+         Starting the session...
+         Reading remote directory...
+         Session started.
+         Active session: [1] pi@192.168.1.66
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src |            0 B |    0,0 KiB/s | binary |   0%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\CMakeLists.txt |          140 B |    0,0 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\code |            0 B |    0,0 KiB/s | binary |   0%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\code\CMakeLists.txt |          423 B |    0,0 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\code\Main.cpp |         17 KiB | 1089,3 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib |            0 B |  562,2 KiB/s | binary |   0%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\CMakeLists.txt |          161 B |  567,3 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\ConfigDaemon.cpp |         13 KiB |  657,1 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\Daemonize.cpp |          3 KiB |  545,5 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\Detection.cpp |          7 KiB |  531,3 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include |            0 B |  531,3 KiB/s | binary |   0%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include\ConfigDaemon.h |          4 KiB |  593,6 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include\Daemonize.h |          1 KiB |  511,7 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include\Detection.h |          3 KiB |  468,9 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include\Ini.h |          2 KiB |  491,6 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\include\Utils.h |          2 KiB |  447,6 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\Ini.cpp |          4 KiB |  487,3 KiB/s | binary | 100%
+         F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\compil\\..\src\lib\Utils.cpp |          5 KiB |  469,6 KiB/s | binary | 100%.
+         === CMAKE on Raspberry Pi === 
+         -- Configuring done
+         -- Generating done
+         -- Build files have been written to: /home/pi/camera_daemon/src
+         === Clean on Raspberry Pi === 
+         make: Entering directory '/home/pi/camera_daemon/src'
+         make[1]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         make[1]: Leaving directory '/home/pi/camera_daemon/src'
+         make: Leaving directory '/home/pi/camera_daemon/src'
+         === Build on Raspberry Pi === 
+         make: Entering directory '/home/pi/camera_daemon/src'
+         make[1]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         [ 16%] Building CXX object lib/CMakeFiles/camera_daemon_lib.dir/Ini.cpp.o
+         [ 33%] Building CXX object lib/CMakeFiles/camera_daemon_lib.dir/Utils.cpp.o
+         [ 50%] Building CXX object lib/CMakeFiles/camera_daemon_lib.dir/Detection.cpp.o
+         [ 66%] Building CXX object lib/CMakeFiles/camera_daemon_lib.dir/Daemonize.cpp.o
+         [ 83%] Building CXX object lib/CMakeFiles/camera_daemon_lib.dir/ConfigDaemon.cpp.o
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp: In function ÔÇÿconfiguration LoadIniFile(char*)ÔÇÖ:
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:144:23: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:161:25: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:162:25: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:163:35: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:165:24: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:177:32: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:178:27: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:179:34: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:180:39: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:181:27: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         /home/pi/camera_daemon/src/lib/ConfigDaemon.cpp:182:30: warning: deprecated conversion from string constant to ÔÇÿchar*ÔÇÖ [-Wwrite-strings]
+         Linking CXX static library libcamera_daemon_lib.a
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         [ 83%] Built target camera_daemon_lib
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         make[2]: Entering directory '/home/pi/camera_daemon/src'
+         [100%] Building CXX object code/CMakeFiles/camera_daemon.dir/Main.cpp.o
+         Linking CXX executable /home/pi/camera_daemon/bin/camera_daemon
+         make[2]: Leaving directory '/home/pi/camera_daemon/src'
+         [100%] Built target camera_daemon
+         make[1]: Leaving directory '/home/pi/camera_daemon/src'
+         make: Leaving directory '/home/pi/camera_daemon/src'
+     1>Done Building Project "F:\GitHub\RaspberryPiWebcamSecuOpenCv\RaspberryPiWebcamSecuOpenCv\camera_daemon\vsSln\Project1\Project1.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:47.58
