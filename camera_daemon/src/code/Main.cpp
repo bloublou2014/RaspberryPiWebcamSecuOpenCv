@@ -1,3 +1,26 @@
+/*
+Copyright (c) 2015 bloublou
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
 #define LINUX
 
 
@@ -29,7 +52,7 @@ using namespace cv;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define VERSION "1.0.1"
+#define VERSION "2.0.0"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +83,8 @@ int main (int argc, char * const argv[])
 	iniFilePath = argv[2];
 	
 	syslog(LOG_INFO, "==================================================");
-	syslog(LOG_INFO, "Webcam raspberry Pi version :" );
+	syslog(LOG_INFO, "Camera Daemon for Raspberry Pi with USB Camera" );
+	syslog(LOG_INFO, "Version :");
 	syslog(LOG_INFO, VERSION);
 
 
@@ -187,13 +211,8 @@ int main (int argc, char * const argv[])
 	Mat prev_frame, current_frame, next_frame;
 
 	// algorithm
-	int zoneSize;
-	int nbZoneX;
-	int nbZoneY;
-	int max_pixelDiffPerZone;
-
-	// stats
-	float* countZonesStats;
+	
+	// stats	
 	time_t statsNextSeconds;
 	time_t statsStartSeconds;
 	char statsStartSecondsChars[20];
@@ -209,6 +228,7 @@ int main (int argc, char * const argv[])
 
 	
 	VideoCapture camera(GlobalConfiguration.cameraNumber); 
+	Detector *detector;
 	
 	try {
 		nbHistoryToCheck = GlobalConfiguration.delayMinSaveImgMs /  GlobalConfiguration.delaySnapshotMs;
@@ -261,18 +281,17 @@ int main (int argc, char * const argv[])
 		kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
 
 		/* Initalize algorithm parameters */
-		computeZoneSize(
-			GlobalConfiguration.detectionWindowsX, 
-			GlobalConfiguration.detectionWindowsX + GlobalConfiguration.detectionWindowsWidth, 
-			GlobalConfiguration.detectionWindowsY, 
-			GlobalConfiguration.detectionWindowsY + GlobalConfiguration.detectionWindowsHeight, 
-			GlobalConfiguration.detectionMinimumPixelChangePct,
-			GlobalConfiguration.detectionNbZones,
-			zoneSize,
-			nbZoneX,
-			nbZoneY,
-			max_pixelDiffPerZone);
+		detector = new Detector(
+			Rect(GlobalConfiguration.detectionWindowsX, 
+				GlobalConfiguration.detectionWindowsY,
+				GlobalConfiguration.detectionWindowsWidth, 
+				GlobalConfiguration.detectionWindowsHeight),
+				GlobalConfiguration.detectionMinimumPixelChangePct,
+				GlobalConfiguration.detectionNbZones
+			);
 
+		detector->motionColor = color;
+		
 		/* Initialize statistics */
 		if( GlobalConfiguration.saveStatitics)
 		{
@@ -347,7 +366,7 @@ int main (int argc, char * const argv[])
 			if (GlobalConfiguration.saveTimeLaps && currentSeconds >= timelapsNextSeconds)
 			{					
 				saveImg(
-						visualizeLastChanges(history,  historyLength, historyIndex, result, 50), 
+						detector->visualizeLastChanges(history, historyLength, historyIndex, result, 50),
 						currentUtcTimeinfo, 
 						GlobalConfiguration.picsDirectory, 
 						GlobalConfiguration.imgExtension, 
@@ -388,20 +407,20 @@ int main (int argc, char * const argv[])
 
 				textToSave << ss;
 
-				textToSave << "'zoneSize'='" << zoneSize << "', ";
-				textToSave << "'nbZoneX'='" << nbZoneX << "', ";
-				textToSave << "'nbZoneY'='" << nbZoneY << "', ";
-				textToSave << "'max_pixelDiffPerZone'='" << max_pixelDiffPerZone << "', ";
+				textToSave << "'zoneSize'='" << detector->zoneSize << "', ";
+				textToSave << "'nbZoneX'='" << detector->cols << "', ";
+				textToSave << "'nbZoneY'='" << detector->rows << "', ";
+				textToSave << "'zoneThresholdPixel'='" << detector->zoneThresholdPixel << "', ";
 
-				if (countZonesStats != NULL)
+				if (detector->countZonesStats != NULL)
 				{
 					textToSave << "'countZonesStats'=[";
-					for (int i=0;i < (nbZoneX*nbZoneY); i++)
+					for (int i = 0; i < (detector->cols*detector->rows); i++)
 					{
-						textToSave << "'" << countZonesStats[i] << "', ";
+						textToSave << "'" << detector->countZonesStats[i] << "', ";
 					}
 					textToSave <<  "], ";
-					countZonesStats = NULL;
+					detector->countZonesStats = NULL;
 				} else {
 					textToSave << "'countZonesStats'=[], ";
 				}
@@ -453,42 +472,23 @@ int main (int argc, char * const argv[])
 			cvtColor(next_frame, next_frame, CV_RGB2GRAY);
 			resizeImage(next_frame, GlobalConfiguration.processResolutionWidth, GlobalConfiguration.processResolutionHeight);
 
-			// Calc differences between the images and do AND-operation
-			// threshold image, low differences are ignored (ex. contrast change due to sunlight)
+			// Compute a diff between previous and current image
+			// output a motion picture
 			absdiff(prev_frame, next_frame, d1);
 			absdiff(next_frame, current_frame, d2);
 			bitwise_and(d1, d2, motion);
 
+			// threshold motion image & erode to avoid too many false positive
 			threshold(motion, motionTreshold, GlobalConfiguration.imageTreshold, 255, CV_THRESH_BINARY);
 			erode(motionTreshold, motionErode, kernel_ero);
         
-			number_of_changes = detectMotionBySquares(
+			// lastFrameTotalActiveZone
+			detector->process(
 				motionErode, 
 				result, 
-				result_cropped,  
-				GlobalConfiguration.detectionWindowsX, 
-				GlobalConfiguration.detectionWindowsY, 
-				GlobalConfiguration.detectionWindowsX + GlobalConfiguration.detectionWindowsWidth, 
-				GlobalConfiguration.detectionWindowsY + GlobalConfiguration.detectionWindowsHeight, 
-				GlobalConfiguration.detectionMinimumPixelChangePct, 
-				color, 
-				GlobalConfiguration.detectionNbZones);
+				result_cropped);
 
-			number_of_changes = detectMotionBySquares2(
-				motionErode, 
-				result, 
-				result_cropped,  
-				GlobalConfiguration.detectionWindowsX, 
-				GlobalConfiguration.detectionWindowsY, 
-				zoneSize, 
-				nbZoneX,
-				nbZoneY,
-				max_pixelDiffPerZone,
-				color, 
-				countZonesStats,
-				GlobalConfiguration.saveStatitics,
-				GlobalConfiguration.detectionNbZones);
-
+			number_of_changes = detector->lastFrameTotalActiveZone;
 
 			// history 
 			history[historyIndex] = number_of_changes;
@@ -511,12 +511,12 @@ int main (int argc, char * const argv[])
 			{
 				nbPositiveDetections++;
 
-				bool saveIt = checkIfBetterLastSecond(history, historyLength, historyIndex, lastHistoryIndexSaved, nbHistoryToCheck);
+				bool saveIt = detector->checkIfBetterLastSecond(history, historyLength, historyIndex, lastHistoryIndexSaved, nbHistoryToCheck);
 				lastHistoryIndexSaved = historyIndex;
 
 				if( (GlobalConfiguration.saveImages) && (number_of_sequence>0 || saveFirstFrame || saveIt)) 
 				{ 
-					historyOutput = visualizeLastChanges(history,  historyLength, historyIndex, result, 50);
+					historyOutput = detector->visualizeLastChanges(history, historyLength, historyIndex, result, 50);
 					if (saveFirstFrame)
 					{
 						result_cropped = result;
