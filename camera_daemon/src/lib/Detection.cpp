@@ -39,6 +39,7 @@ Detector::Detector(
 
 void Detector::Init()
 {
+	syslog(LOG_INFO, "Init detector", nbZones);
 	this->detectionArea = detectionZone.height * detectionZone.width;
 
 	int squareSize = floor(sqrt((float)(this->detectionZone.width * this->detectionZone.height) / (float)this->nbZones));
@@ -48,6 +49,8 @@ void Detector::Init()
 	this->zoneSize = squareSize;
 
 	this->zoneThresholdPixel = floor(this->zoneSize * this->zoneSize * this->zoneThresholdPercentage / (float)100);
+
+	this->IsStatsEnabled = false;
 }
 
 bool Detector::process(
@@ -61,13 +64,13 @@ bool Detector::process(
 	float ratioMotionToResultWidth = (float)result.cols / (float)motion.cols;
 	float ratioMotionToResultHeight = (float)result.rows / (float)motion.rows;
 
-
 	if (this->IsStatsEnabled && this->countZonesStats == NULL)
 	{
-		this->countZonesStats = new float[nbZones];
+		syslog(LOG_INFO, "Init stats with  %i zones", nbZones);
+		this->countZonesStats = new float[nbZones]();
 	}
 
-	float* countZones = new float[nbZones];
+	float* countZones = new float[nbZones]();
 
 	// compute ratio between process & result image
 	int x, y;
@@ -80,6 +83,7 @@ bool Detector::process(
 
 	topLeft.x = topLeft.y = bottomRight.x = bottomRight.y = -1;
 
+	float currentZoneCount;
 
 	for (int i = 0; i < this->cols; i++)
 		for (int j = 0; j < this->rows; j++)
@@ -92,12 +96,12 @@ bool Detector::process(
 			// Count number of positive pixels on motion image
 			roi = motion(Rect(x == 0 ? 1 : x, y == 0 ? 1 : y, this->zoneSize, this->zoneSize));
 			nbPositivePixels = countNonZero(roi);
-			countZones[zoneNo] = (float)nbPositivePixels / (float)this->zoneThresholdPixel;
+			currentZoneCount = (float)nbPositivePixels / (float)this->zoneThresholdPixel;
+			countZones[zoneNo] = currentZoneCount;
 
 			if (this->IsStatsEnabled)
 			{
-				// float countZonesStats[];
-				//countZonesStats[zoneNo] += countZones[zoneNo];
+				this->countZonesStats[zoneNo] += currentZoneCount;
 			}
 
 			if (countZones[zoneNo] >= 1)
@@ -143,13 +147,13 @@ bool Detector::process(
 
 	if ((IsDrawDetectedZoneEnabled || IsCroppedEnabled) && topLeft.y > -1)
 	{
-	
+
 		topLeft.x = topLeft.x * ratioMotionToResultWidth;
 		bottomRight.x = bottomRight.x * ratioMotionToResultWidth;
 
 		topLeft.y = topLeft.y * ratioMotionToResultHeight;
 		bottomRight.y = bottomRight.y * ratioMotionToResultHeight;
-		
+
 		// draw on result
 		if (IsDrawDetectedZoneEnabled){
 			rectangle(result, topLeft, bottomRight, this->motionColor, this->drawDetectedZoneWidth);
@@ -169,10 +173,10 @@ bool Detector::process(
 
 
 Mat Detector::visualizeLastChanges(
-	int *history, 
-	int historyLength, 
-	int historyIndex, 
-	Mat image, 
+	int *history,
+	int historyLength,
+	int historyIndex,
+	Mat image,
 	int height) // 20
 {
 	// compute number of pixel per history length
@@ -224,10 +228,10 @@ Mat Detector::visualizeLastChanges(
 }
 
 bool Detector::checkIfBetterLastSecond(
-	int *history, 
-	int historyLength, 
-	int historyIndex, 
-	int lastHistoryIndexSaved, 
+	int *history,
+	int historyLength,
+	int historyIndex,
+	int lastHistoryIndexSaved,
 	int deltaHistory)
 {
 	if (lastHistoryIndexSaved < 0)

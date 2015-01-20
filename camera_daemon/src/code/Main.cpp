@@ -56,34 +56,34 @@ using namespace cv;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main (int argc, char * const argv[])
+int main(int argc, char * const argv[])
 {
 	char*	iniFilePath;
-	
+
 	// get output directory for files
-	
-	if(argc < 2)
+
+	if (argc < 2)
 	{
-		printf("First argument should be -INI [ini file path] or -STOP\n");		
+		printf("First argument should be -INI [ini file path] or -STOP\n");
 		return -1;
 	}
 
-	if(strcasecmp( argv[1], "-STOP")==0)
+	if (strcasecmp(argv[1], "-STOP") == 0)
 	{
 		printf("Stopping daemon here...\n");
 		return -1;
 	}
 
-	if(strcasecmp( argv[1], "-INI")!=0)
+	if (strcasecmp(argv[1], "-INI") != 0)
 	{
 		printf("First argument should -OUTPUT [output directory]\n");
 		return -1;
 	}
 
 	iniFilePath = argv[2];
-	
+
 	syslog(LOG_INFO, "==================================================");
-	syslog(LOG_INFO, "Camera Daemon for Raspberry Pi with USB Camera" );
+	syslog(LOG_INFO, "Camera Daemon for Raspberry Pi with USB Camera");
 	syslog(LOG_INFO, "Version :");
 	syslog(LOG_INFO, VERSION);
 
@@ -143,12 +143,12 @@ int main (int argc, char * const argv[])
 	sigaddset(&newSigSet, SIGTTOU);  /* ignore Tty background writes */
 	sigaddset(&newSigSet, SIGTTIN);  /* ignore Tty background reads */
 	sigprocmask(SIG_BLOCK, &newSigSet, NULL);   /* Block the above specified signals */
- 
+
 	/* Set up a signal handler */
 	newSigAction.sa_handler = signal_handler;
 	sigemptyset(&newSigAction.sa_mask);
 	newSigAction.sa_flags = 0;
- 
+
 	/* Signals to handle */
 	sigaction(SIGHUP, &newSigAction, NULL);     /* catch hangup signal */
 	sigaction(SIGTERM, &newSigAction, NULL);    /* catch term signal */
@@ -158,32 +158,32 @@ int main (int argc, char * const argv[])
 	/* Fork off the parent process */
 	pid = fork();
 	if (pid < 0) {
-			exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 	/* If we got a good PID, then
 		we can exit the parent process. */
 	if (pid > 0) {
-			exit(EXIT_SUCCESS);
+		exit(EXIT_SUCCESS);
 	}
 
 	/* Change the file mode mask */
 	umask(0);
-				
-	/* Open any logs here */        
-				
+
+	/* Open any logs here */
+
 	/* Create a new SID for the child process */
 	sid = setsid();
 	if (sid < 0) {
-			/* Log the failure */
-			exit(EXIT_FAILURE);
+		/* Log the failure */
+		exit(EXIT_FAILURE);
 	}
-				
+
 	/* Change the current working directory */
 	if ((chdir(GlobalConfiguration.picsDirectory)) < 0) {
-			/* Log the failure */
-			exit(EXIT_FAILURE);
+		/* Log the failure */
+		exit(EXIT_FAILURE);
 	}
-		
+
 	/* Close out the standard file descriptors */
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
@@ -193,25 +193,25 @@ int main (int argc, char * const argv[])
 	daemonize(GlobalConfiguration);
 
 	syslog(LOG_INFO, "Daemonize done");
-	
+
 	/* =================================================== Init =================================================== */
 	int nbHistoryToCheck;
 	Mat d1, d2, motion, motionTreshold, motionErode;
 	int number_of_changes, number_of_sequence = 0;
-	Scalar mean_, color(0,255,255); // yellow
+	Scalar mean_, color(0, 255, 255); // yellow
 
 	int historyLength = GlobalConfiguration.cameraResolutionWidth;
 	int lastHistoryIndexSaved = -1;
 	int historyIndex = 0;
 	int *history;
 	Mat historyOutput;
-	
+
 	Mat kernel_ero;
 	Mat result, result_cropped;
 	Mat prev_frame, current_frame, next_frame;
 
 	// algorithm
-	
+
 	// stats	
 	time_t statsNextSeconds;
 	time_t statsStartSeconds;
@@ -226,20 +226,20 @@ int main (int argc, char * const argv[])
 	// check 
 	time_t checkTriggerNextSeconds;
 
-	
-	VideoCapture camera(GlobalConfiguration.cameraNumber); 
+
+	VideoCapture camera(GlobalConfiguration.cameraNumber);
 	Detector *detector;
-	
+
 	try {
-		nbHistoryToCheck = GlobalConfiguration.delayMinSaveImgMs /  GlobalConfiguration.delaySnapshotMs;
+		nbHistoryToCheck = GlobalConfiguration.delayMinSaveImgMs / GlobalConfiguration.delaySnapshotMs;
 		history = new int[historyLength];
 
-		if( !camera.isOpened() )
+		if (!camera.isOpened())
 			throw "Cannot connect to camera during initialization";
 
 		camera.set(CV_CAP_PROP_FRAME_WIDTH, GlobalConfiguration.cameraResolutionWidth); // width of viewport of camera
 		camera.set(CV_CAP_PROP_FRAME_HEIGHT, GlobalConfiguration.cameraResolutionHeight); // height of ...
-    
+
 		// Take images and convert them to gray
 		camera >> result;
 		prev_frame = result;
@@ -251,7 +251,7 @@ int main (int argc, char * const argv[])
 		cvtColor(current_frame, current_frame, CV_RGB2GRAY);
 		cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
 		cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-    
+
 		resizeImage(prev_frame, GlobalConfiguration.processResolutionWidth, GlobalConfiguration.processResolutionHeight);
 		resizeImage(current_frame, GlobalConfiguration.processResolutionWidth, GlobalConfiguration.processResolutionHeight);
 		resizeImage(next_frame, GlobalConfiguration.processResolutionWidth, GlobalConfiguration.processResolutionHeight);
@@ -260,9 +260,9 @@ int main (int argc, char * const argv[])
 		// result, the result of and operation, calculated on d1 and d2
 		// number_of_changes, the amount of changes in the result matrix.
 		// color, the color for drawing the rectangle when something has changed.
-	
+
 		// init history 
-		for (int i=0; i<historyLength; i++)
+		for (int i = 0; i < historyLength; i++)
 			history[i] = 0;
 
 		if (GlobalConfiguration.detectionWindowsWidth < 1)
@@ -276,30 +276,31 @@ int main (int argc, char * const argv[])
 			GlobalConfiguration.detectionWindowsHeight = GlobalConfiguration.processResolutionHeight - GlobalConfiguration.detectionWindowsY;
 			syslog(LOG_INFO, "detectionWindowsHeight : %d pixel", GlobalConfiguration.detectionWindowsHeight);
 		}
-    
+
 		// Erode kernel
-		kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
+		kernel_ero = getStructuringElement(MORPH_RECT, Size(2, 2));
 
 		/* Initalize algorithm parameters */
+		syslog(LOG_INFO, "Initialize Detector");
 		detector = new Detector(
-			Rect(GlobalConfiguration.detectionWindowsX, 
-				GlobalConfiguration.detectionWindowsY,
-				GlobalConfiguration.detectionWindowsWidth, 
-				GlobalConfiguration.detectionWindowsHeight),
-				GlobalConfiguration.detectionMinimumPixelChangePct,
-				GlobalConfiguration.detectionNbZones
+			Rect(GlobalConfiguration.detectionWindowsX,
+			GlobalConfiguration.detectionWindowsY,
+			GlobalConfiguration.detectionWindowsWidth,
+			GlobalConfiguration.detectionWindowsHeight),
+			GlobalConfiguration.detectionMinimumPixelChangePct,
+			GlobalConfiguration.detectionNbZones
 			);
 
 		detector->motionColor = color;
-		
+
 		/* Initialize statistics */
-		if( GlobalConfiguration.saveStatitics)
+		if (GlobalConfiguration.saveStatitics)
 		{
-			time (&statsNextSeconds);
-			time (&statsStartSeconds);
+			time(&statsNextSeconds);
+			time(&statsStartSeconds);
 			struct tm * statsStartSecondsTimeinfo;
-			statsStartSecondsTimeinfo = gmtime (&statsStartSeconds);
-			strftime (statsStartSecondsChars, 20, "%Y/%m/%d %H:%M:%S", statsStartSecondsTimeinfo);
+			statsStartSecondsTimeinfo = gmtime(&statsStartSeconds);
+			strftime(statsStartSecondsChars, 20, "%Y/%m/%d %H:%M:%S", statsStartSecondsTimeinfo);
 
 			statsNextSeconds += GlobalConfiguration.statisticsPeriodSec;
 			nbDetections = 0;
@@ -307,38 +308,39 @@ int main (int argc, char * const argv[])
 		}
 
 		/* Initialize timelaps */
-		if( GlobalConfiguration.saveTimeLaps)
+		if (GlobalConfiguration.saveTimeLaps)
 		{
 			timelapsNextSeconds = getTime();
 			timelapsNextSeconds += GlobalConfiguration.timeLapsPeriodSec;
-			
+
 			// get next start time
 			timelapsNextSeconds =
 				getNextStepSecond(
-					getTime(), 
-					GlobalConfiguration.timeLapsPeriodSec, 
-					GlobalConfiguration.timeLapsStartMinute*60, 
-					GlobalConfiguration.timeLapsEndMinute*60);
+				getTime(),
+				GlobalConfiguration.timeLapsPeriodSec,
+				GlobalConfiguration.timeLapsStartMinute * 60,
+				GlobalConfiguration.timeLapsEndMinute * 60);
 
 			char TIME[20];
 			struct tm * tmpInfo;
-			tmpInfo = gmtime (&timelapsNextSeconds);
-			strftime (TIME, 80, "%Y/%m/%d %H:%M:%S", tmpInfo);
+			tmpInfo = gmtime(&timelapsNextSeconds);
+			strftime(TIME, 80, "%Y/%m/%d %H:%M:%S", tmpInfo);
 			syslog(LOG_INFO, "Next timelaps start : %s", TIME);
 		}
 
 		/* Initialize file checker */
-		if( GlobalConfiguration.checkTriggerFile)
+		if (GlobalConfiguration.checkTriggerFile)
 		{
 			checkTriggerNextSeconds = getTime();
 			checkTriggerNextSeconds += GlobalConfiguration.checkTriggerFilePeriodSec;
 		}
 
 		syslog(LOG_INFO, "Init successful");
-	} catch (std::exception& e)
+	}
+	catch (std::exception& e)
 	{
 		stringstream ss;
-		ss  << "Error initializing with message '" << e.what() << "'\n";
+		ss << "Error initializing with message '" << e.what() << "'\n";
 		syslog(LOG_ERR, ss.str().c_str());
 		exit(EXIT_FAILURE);
 	}
@@ -350,55 +352,57 @@ int main (int argc, char * const argv[])
 		syslog(LOG_INFO, "Starting infinite Loop");
 		time_t currentSeconds;
 		struct tm * currentUtcTimeinfo;
-		while (1) {
-			
-			time (&currentSeconds);
-			currentUtcTimeinfo = gmtime (&currentSeconds);
+		long noFrame = 0;
 
-		   // Take a new image
+		while (1) {
+			noFrame++;
+			time(&currentSeconds);
+			currentUtcTimeinfo = gmtime(&currentSeconds);
+
+			// Take a new image
 			prev_frame = current_frame;
 			current_frame = next_frame;
-      
-			camera >>  next_frame;
+
+			camera >> next_frame;
 			result = next_frame.clone();
 
 			// save timelaps ?
 			if (GlobalConfiguration.saveTimeLaps && currentSeconds >= timelapsNextSeconds)
-			{					
+			{
 				saveImg(
-						detector->visualizeLastChanges(history, historyLength, historyIndex, result, 50),
-						currentUtcTimeinfo, 
-						GlobalConfiguration.picsDirectory, 
-						GlobalConfiguration.imgExtension, 
-						GlobalConfiguration.imageDirectoryFormat, 
-						GlobalConfiguration.timelapsFileFormat);
+					detector->visualizeLastChanges(history, historyLength, historyIndex, result, 50),
+					currentUtcTimeinfo,
+					GlobalConfiguration.picsDirectory,
+					GlobalConfiguration.imgExtension,
+					GlobalConfiguration.imageDirectoryFormat,
+					GlobalConfiguration.timelapsFileFormat);
 
 				timelapsNextSeconds =
 					getNextStepSecond(
-						currentSeconds, 
-						GlobalConfiguration.timeLapsPeriodSec, 
-						GlobalConfiguration.timeLapsStartMinute*60, 
-						GlobalConfiguration.timeLapsEndMinute*60);
+					currentSeconds,
+					GlobalConfiguration.timeLapsPeriodSec,
+					GlobalConfiguration.timeLapsStartMinute * 60,
+					GlobalConfiguration.timeLapsEndMinute * 60);
 
 				char TIME[20];
 				struct tm * tmpInfo;
-				tmpInfo = gmtime (&timelapsNextSeconds);
-				strftime (TIME, 80, "%Y/%m/%d %H:%M:%S", tmpInfo);
+				tmpInfo = gmtime(&timelapsNextSeconds);
+				strftime(TIME, 80, "%Y/%m/%d %H:%M:%S", tmpInfo);
 				syslog(LOG_INFO, "Next timelaps start : %s", TIME);
 			}
 
 			// save stats ?
 			if (GlobalConfiguration.saveStatitics && currentSeconds >= statsNextSeconds)
-			{	
+			{
 				stringstream textToSave;
 				textToSave.str("");
 				textToSave << "{'version'='1',";
-				
+
 				char TIME[20];
 
-				strftime (TIME, 80, "%Y/%m/%d %H:%M:%S", currentUtcTimeinfo);
-				
-				textToSave << "'startdate'='" <<  statsStartSecondsChars << "', ";
+				strftime(TIME, 80, "%Y/%m/%d %H:%M:%S", currentUtcTimeinfo);
+
+				textToSave << "'startdate'='" << statsStartSecondsChars << "', ";
 				textToSave << "'enddate'='" << TIME << "', ";
 
 
@@ -412,16 +416,17 @@ int main (int argc, char * const argv[])
 				textToSave << "'nbZoneY'='" << detector->rows << "', ";
 				textToSave << "'zoneThresholdPixel'='" << detector->zoneThresholdPixel << "', ";
 
-				if (detector->countZonesStats != NULL)
+				if (detector->IsStatsEnabled && detector->countZonesStats != NULL)
 				{
 					textToSave << "'countZonesStats'=[";
 					for (int i = 0; i < (detector->cols*detector->rows); i++)
 					{
 						textToSave << "'" << detector->countZonesStats[i] << "', ";
 					}
-					textToSave <<  "], ";
+					textToSave << "], ";
 					detector->countZonesStats = NULL;
-				} else {
+				}
+				else {
 					textToSave << "'countZonesStats'=[], ";
 				}
 
@@ -433,14 +438,14 @@ int main (int argc, char * const argv[])
 
 				// save statistics to file
 				saveToFile(
-					currentUtcTimeinfo, 
-					GlobalConfiguration.logsDirectory, 
-					GlobalConfiguration.imageDirectoryFormat, 
+					currentUtcTimeinfo,
+					GlobalConfiguration.logsDirectory,
+					GlobalConfiguration.imageDirectoryFormat,
 					GlobalConfiguration.statsFileFormat,
 					textToSave.str());
 
 				statsStartSeconds = currentSeconds;
-				strftime (statsStartSecondsChars, 20, "%Y/%m/%d %H:%M:%S", currentUtcTimeinfo);
+				strftime(statsStartSecondsChars, 20, "%Y/%m/%d %H:%M:%S", currentUtcTimeinfo);
 
 				statsNextSeconds = currentSeconds + GlobalConfiguration.statisticsPeriodSec;
 				nbDetections = 0;
@@ -452,15 +457,14 @@ int main (int argc, char * const argv[])
 			{
 				if (fileExists(GlobalConfiguration.takeSnapshotTriggerFile))
 				{
-					syslog(LOG_INFO, "Taking snapshot");
 					// take a snapshot 
 					saveImg(
-							result, 
-							currentUtcTimeinfo, 
-							GlobalConfiguration.picsDirectory, 
-							GlobalConfiguration.imgExtension, 
-							GlobalConfiguration.imageDirectoryFormat, 
-							GlobalConfiguration.triggerFileFormat);
+						result,
+						currentUtcTimeinfo,
+						GlobalConfiguration.picsDirectory,
+						GlobalConfiguration.imgExtension,
+						GlobalConfiguration.imageDirectoryFormat,
+						GlobalConfiguration.triggerFileFormat);
 
 					remove(GlobalConfiguration.takeSnapshotTriggerFile);
 				}
@@ -481,13 +485,12 @@ int main (int argc, char * const argv[])
 			// threshold motion image & erode to avoid too many false positive
 			threshold(motion, motionTreshold, GlobalConfiguration.imageTreshold, 255, CV_THRESH_BINARY);
 			erode(motionTreshold, motionErode, kernel_ero);
-        
+
 			// lastFrameTotalActiveZone
 			detector->process(
-				motionErode, 
-				result, 
+				motionErode,
+				result,
 				result_cropped);
-
 			number_of_changes = detector->lastFrameTotalActiveZone;
 
 			// history 
@@ -503,8 +506,8 @@ int main (int argc, char * const argv[])
 			{
 				historyIndex = 0;
 			}
-			
-			nbDetections ++;
+
+			nbDetections++;
 
 			// If a lot of changes happened, we assume something changed.
 			if (number_of_changes >= GlobalConfiguration.detectionMotionLevel || saveFirstFrame)
@@ -514,33 +517,33 @@ int main (int argc, char * const argv[])
 				bool saveIt = detector->checkIfBetterLastSecond(history, historyLength, historyIndex, lastHistoryIndexSaved, nbHistoryToCheck);
 				lastHistoryIndexSaved = historyIndex;
 
-				if( (GlobalConfiguration.saveImages) && (number_of_sequence>0 || saveFirstFrame || saveIt)) 
-				{ 
+				if ((GlobalConfiguration.saveImages) && (number_of_sequence > 0 || saveFirstFrame || saveIt))
+				{
 					historyOutput = detector->visualizeLastChanges(history, historyLength, historyIndex, result, 50);
 					if (saveFirstFrame)
 					{
 						result_cropped = result;
 					}
-					
+
 					// Get the current time
-					
+
 					// check if this motion is over last second one
 					//saveImg(result,DIR,EXT,DIR_FORMAT.c_str(),FILE_FORMAT.c_str());
 					saveImg(
-							historyOutput, 
-							currentUtcTimeinfo, 
-							GlobalConfiguration.picsDirectory, 
-							GlobalConfiguration.imgExtension, 
-							GlobalConfiguration.imageDirectoryFormat, 
-							GlobalConfiguration.imageFileFormat);
+						historyOutput,
+						currentUtcTimeinfo,
+						GlobalConfiguration.picsDirectory,
+						GlobalConfiguration.imgExtension,
+						GlobalConfiguration.imageDirectoryFormat,
+						GlobalConfiguration.imageFileFormat);
 
 					saveImg(
-							result_cropped, 
-							currentUtcTimeinfo, 
-							GlobalConfiguration.picsDirectory, 
-							GlobalConfiguration.imgExtension, 
-							GlobalConfiguration.imageCroppedDirectoryFormat, 
-							GlobalConfiguration.imageCroppedFileFormat);
+						result_cropped,
+						currentUtcTimeinfo,
+						GlobalConfiguration.picsDirectory,
+						GlobalConfiguration.imgExtension,
+						GlobalConfiguration.imageCroppedDirectoryFormat,
+						GlobalConfiguration.imageCroppedFileFormat);
 				}
 				saveFirstFrame = false;
 				number_of_sequence++;
@@ -550,14 +553,15 @@ int main (int argc, char * const argv[])
 			{
 				number_of_sequence = 0;
 				// Delay, wait a 1/2 second.
-				cvWaitKey (GlobalConfiguration.delaySnapshotMs);
+				cvWaitKey(GlobalConfiguration.delaySnapshotMs);
 			}
 		}
 		/* ================================================================================= */
-	} catch (std::exception& e)
+	}
+	catch (std::exception& e)
 	{
 		stringstream ss;
-		ss  << "Error initializing with message '" << e.what() << "'\n";
+		ss << "Error initializing with message '" << e.what() << "'\n";
 		syslog(LOG_ERR, ss.str().c_str());
 		exit(EXIT_FAILURE);
 	}
